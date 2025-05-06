@@ -1,7 +1,7 @@
 import os
 import sys
 import traci
-#comment
+
 if 'SUMO_HOME' not in os.environ:
     os.environ['SUMO_HOME'] = r"C:\SUMO"  # Update this path
 

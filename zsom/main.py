@@ -14,18 +14,20 @@ if 'SUMO_HOME' not in os.environ:
 tools_path = os.path.join(os.environ['SUMO_HOME'], 'tools')
 sys.path.append(tools_path)
 cfg_file = "../sumo_files/onramp.sumocfg"
+#network = "../sumo_files/onramp.netccfg"
+#network_cmd = ["sumo-gui", "-c", network]
 
 def run_simulation(sumocfg):
 
     # Set the SUMO command to start SUMO with GUI and dump emissions to the results folder
-    sumocmd = ["sumo", "-c", sumocfg]
+    sumocmd = ["sumo-gui", "-c", sumocfg]
     # Start SUMO with the command
     traci.start(sumocmd)
 
     simulation_time = 0.00
     for i in range(1000):
         traci.simulationStep()
-        simulation_time = i * 1
+        simulation_time = i
 
 
     # Close TraCI
@@ -36,18 +38,7 @@ def run_simulation(sumocfg):
 
 
 def main():
-
-    if cfg_file:
-        if os.path.exists(cfg_file):
-            run_simulation(cfg_file)
-            return
-        else:
-            run_simulation(cfg_file)
-            print("The given SUMO configuration file does not exist!")
-            return
-    else:
-        print("Please provide a SUMO configuration file for the simulation.")
-        return
+    run_simulation(cfg_file)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 <edges>
-    <edge id="AB" from="A" to="B" type="highway"  priority="1"/>
-    <edge id="BC" from="B" to="C" type="highway" priority="1"/>
-    <edge id="DB" from="D" to="B" priority="3"/>
+    <edge id="h1" from="H1" to="H2" type="highway" />
+    <edge id="h2" from="H2" to="H3" type="highway" />
+    <edge id="h3" from="H3" to="H4" type="highway" />
+    <edge id="r1" from="R1" to="H2" />
+    <edge id="r2" from="R2" to="H3" />
 </edges>

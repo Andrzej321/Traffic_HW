@@ -5,6 +5,6 @@
         <type-files value="onramp.typ.xml"/>
     </input>
     <output>
-        <net-file value="onramp.net.xml"/>
+        <net-file value="net.net.xml"/>
     </output>
 </configuration>

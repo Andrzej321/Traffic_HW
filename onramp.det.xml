@@ -1,5 +1,0 @@
-<additional>
-    <inductionLoop id="loop0" lane="AB_0" pos="250" freq="1" file="hw_output_1.xml"/>
-    <inductionLoop id="loop1" lane="AB_1" pos="250" freq="1" file="hw_output_2.xml"/>
-	<inductionLoop id="loop2" lane="DB_0" pos="90" freq="1" file="or_output_1.xml"/>
-</additional>

@@ -4,7 +4,7 @@ import traci
 import numpy as np
 from gymnasium import Env
 from gymnasium import spaces
-from typing import Tuple
+from typing import Tuple, List
 
 
 class TrafficLightEnv(Env):

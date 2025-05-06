@@ -1,46 +1,23 @@
 import os
 import sys
-import numpy as np
 from stable_baselines3 import DQN  # Popular RL implementation
-import traci
+from classes_test import TrafficLightEnvTest
 
 
 # Make sure SUMO_HOME environment variable is set
 if 'SUMO_HOME' not in os.environ:
-    os.environ['SUMO_HOME'] = 'path/to/your/sumo/installation'  # Update this path
+    os.environ['SUMO_HOME'] = 'C:\Sumo'  # Update this path
 
 # Add SUMO tools to Python path
 tools_path = os.path.join(os.environ['SUMO_HOME'], 'tools')
 sys.path.append(tools_path)
 
-
-# First, create a simple SUMO configuration
-def create_simple_sumocfg():
-    """
-    Create a simple SUMO configuration file if you don't have one
-    """
-    config_content = """<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <input>
-        <net-file value="intersection.net.xml"/>
-        <route-files value="routes.rou.xml"/>
-        <additional-files value="detectors.add.xml"/>
-    </input>
-    <time>
-        <begin value="0"/>
-        <end value="3600"/>
-        <step-length value="1.0"/>
-    </time>
-</configuration>
-"""
-    with open("simple.sumocfg", "w") as f:
-        f.write(config_content)
-
+cfg_file = 'onramp.sumocfg'
 
 # Main script to run the traffic light control
 def main():
     # Initialize the environment
-    env = TrafficLightEnv("simple.sumocfg")
+    env = TrafficLightEnvTest(cfg_file)
 
     # Create DQN agent
     model = DQN(
@@ -91,10 +68,10 @@ def main():
 
     env.close()
 
-
+"""
 # Function to evaluate the trained agent
 def evaluate_agent(model_path, num_episodes=5):
-    env = TrafficLightEnv("simple.sumocfg")
+    env = TrafficLightEnvTest("simple.sumocfg")
     model = DQN.load(model_path)
 
     for episode in range(num_episodes):
@@ -118,7 +95,7 @@ def evaluate_agent(model_path, num_episodes=5):
 # Example usage with visualization
 def run_visualization(model_path):
     # Use SUMO-GUI instead of SUMO for visualization
-    env = TrafficLightEnv("simple.sumocfg", gui=True)
+    env = TrafficLightEnvTest("simple.sumocfg", gui=True)
     model = DQN.load(model_path)
 
     state, _ = env.reset()
@@ -143,3 +120,4 @@ if __name__ == "__main__":
 
     # Visualization
     run_visualization("traffic_light_model_episode_100")
+"""

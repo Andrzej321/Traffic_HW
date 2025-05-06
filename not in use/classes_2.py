@@ -1,11 +1,23 @@
 from typing import Tuple, Dict
 import numpy as np
 from gymnasium import spaces
+import os
+import sys
 
 
-class TrafficLightEnv:
+class TrafficLightEnv2:
     def __init__(self, sumocfg_file: str):
         # SUMO initialization code here...
+        # SUMO configuration
+        if 'SUMO_HOME' in os.environ:
+            tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
+            sys.path.append(tools)
+        else:
+            raise ImportError("Please declare environment variable 'SUMO_HOME'")
+
+        self.sumocfg = sumocfg_file
+        self.sumo_seed = 42
+        self.step_length = 1.0  # seconds per step
 
         self.tl_id = "your_traffic_light_id"  # Set your traffic light ID
 

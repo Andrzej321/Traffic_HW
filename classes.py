@@ -59,7 +59,7 @@ class TrafficLightEnv(Env):
             traci.start(sumo_cmd)
             self.sumo = traci
 
-    def _get_inductionloop_state(self) -> Dict:
+    def _get_inductionloop_state(self):
         """
         Get information from induction loop detectors
         """
@@ -90,7 +90,7 @@ class TrafficLightEnv(Env):
 
         return detector_data
 
-    def _get_vehicle_data(self, detector_id: str) -> List[Dict]:
+    def _get_vehicle_data(self, detector_id: str):
         """
         Get detailed vehicle data from an induction loop
         """
@@ -110,7 +110,7 @@ class TrafficLightEnv(Env):
 
         return processed_data
 
-    def _get_specific_detector_state(self, detector_id: str) -> Dict:
+    def _get_specific_detector_state(self, detector_id: str):
         """
         Get comprehensive state for a specific detector
         """
@@ -131,7 +131,7 @@ class TrafficLightEnv(Env):
             'vehicle_data': self._get_vehicle_data(detector_id)
         }
 
-    def _get_approach_detectors_state(self) -> Dict:
+    def _get_approach_detectors_state(self):
         """
         Get state from detectors grouped by approach direction
         """
@@ -174,7 +174,7 @@ class TrafficLightEnv(Env):
 
         return approach_states
 
-    def _get_detector_state_vector(self, detector_ids: List[str]) -> np.ndarray:
+    def _get_detector_state_vector(self, detector_ids: List[str]):
         """
         Create a fixed-size state vector from multiple detectors
         Useful for RL input
@@ -268,7 +268,7 @@ class TrafficLightEnv(Env):
 
         return next_state, reward, done, False, info
 
-    def _get_current_metrics(self) -> Dict:
+    def _get_current_metrics(self):
         """
         Helper function to get current traffic metrics
         """

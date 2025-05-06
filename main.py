@@ -4,6 +4,9 @@ import traci
 from stable_baselines3 import DQN
 from classes_test import TrafficLightEnvTest
 
+if 'SUMO_HOME' not in os.environ:
+    os.environ['SUMO_HOME'] = r"C:\SUMO"  # Update this path
+
 # Make sure SUMO_HOME environment variable is set correctly
 if 'SUMO_HOME' not in os.environ:
     # This should point to the actual SUMO installation directory, not the config files

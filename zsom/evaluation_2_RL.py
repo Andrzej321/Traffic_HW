@@ -283,8 +283,8 @@ state_size = 4  # (2 highway detector, 1 on-ramp detector, current traffic light
 action_size = len(ACTIONS)
 
 # Build DQN model
-dqn_model_1 = tf.keras.models.load_model(r"C:\my files\thesis\Traffic_HW\zsom\models_3\run_5_1.keras")
-dqn_model_2 = tf.keras.models.load_model(r"C:\my files\thesis\Traffic_HW\zsom\models_3\run_5_1.keras")
+dqn_model_1 = tf.keras.models.load_model(r"..\zsom\models_3\run_5_1.keras")
+dqn_model_2 = tf.keras.models.load_model(r"..\zsom\models_3\run_5_2.keras")
 
 # Initialize parameters
 last_switch_step_1 = -MIN_GREEN_STEPS

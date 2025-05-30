@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt  # Visualization
 import tensorflow
 from tensorflow import keras
 from tensorflow.keras import layers
+import tensorflow as tf
 
 # Step 2: Establish path to SUMO (SUMO_HOME)
 if 'SUMO_HOME' in os.environ:
@@ -116,7 +117,7 @@ def get_max_Q_value_of_state(s):  # 1. Objective Function
     return np.max(Q_values)
 
 
-def get_reward(state):  # 2. Constraint 2
+def get_reward_1(state):  # 2. Constraint 2
     """
     Simple reward function:
     Negative of total queue length to encourage shorter queues.
@@ -126,8 +127,8 @@ def get_reward(state):  # 2. Constraint 2
               traci.lane.getLastStepVehicleNumber(lane) > 0]
     avg_speed = sum(speeds) / len(speeds) if speeds else 0.0
 
-    queue_r1 = traci.lane.getLastStepHaltingNumber("r1_0")
-    queue_r2 = traci.lane.getLastStepHaltingNumber("r2_0")
+    queue_1 = traci.lane.getLastStepHaltingNumber("r1_0")
+    queue_2 = traci.lane.getLastStepHaltingNumber("r2_0")
 
     emergency_brakes = 0
     for veh_id in traci.vehicle.getIDList():
@@ -140,7 +141,7 @@ def get_reward(state):  # 2. Constraint 2
             emergency_brakes += 1
 
     speed_reward = avg_speed / 33.33 if avg_speed > 0 else 0.0
-    queue_penalty = -0.1 * (queue_r1 + queue_r2)
+    queue_penalty = -0.1 * (queue_1 + queue_2)
     brake_penalty = -0.9 * emergency_brakes
 
     return speed_reward + queue_penalty + brake_penalty
@@ -303,8 +304,8 @@ for run in range(NUM_RUNS):
         reward_history.append(cumulative_reward)
         queue_history.append(sum(new_state[:-1]))  # sum of queue lengths
 
-    os.makedirs("models", exist_ok=True)
-    model_path = f"../zsom/models/run{run + 1}"
+    os.makedirs("models_2", exist_ok=True)
+    model_path = f"../zsom/models_2/run{run + 1}"
     dqn_model.export(model_path)
     print(f"Run {run + 1}: Trained model saved to '{model_path}'")
 

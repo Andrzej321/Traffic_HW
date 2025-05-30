@@ -244,8 +244,6 @@ def get_state_2():  # 3&4. Constraint 3 & 4
     det4 = "loop4"
     det5 = "loop5"
 
-
-
     # Get queue lengths from each detector
     loop3 = traci.lanearea.getLastStepVehicleNumber(det3)
     loop4 = traci.lanearea.getLastStepVehicleNumber(det4)
@@ -389,7 +387,6 @@ def get_action_from_policy_2(state):  # 7. Constraint 7
         state_array = to_array(state)
         Q_values = dqn_model_2.predict(state_array, verbose=0)[0]
         return int(np.argmax(Q_values))
-
 
 # -------------------------
 # Step 8: Fully Online Continuous Learning Loop

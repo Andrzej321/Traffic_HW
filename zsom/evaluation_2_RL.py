@@ -289,7 +289,7 @@ cumulative_reward_1 = 0.0
 cumulative_reward_2 = 0.0
 
 # Choose a random config file (predefined set of config files with varying lane density) to train on
-chosen_config_file = r"..\sumo_files\onramp_test.sumocfg"
+chosen_config_file = r"../sumo_files/test_files/onramp_test.sumocfg"
 
 # Define Sumo configuration with the chosen config file
 Sumo_config = [

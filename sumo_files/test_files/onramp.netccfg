@@ -1,0 +1,10 @@
+<configuration>
+    <input>
+        <node-files value="onramp.nod.xml"/>
+        <edge-files value="onramp.edg.xml"/>
+        <type-files value="onramp.typ.xml"/>
+    </input>
+    <output>
+        <net-file value="net.net.xml"/>
+    </output>
+</configuration>

@@ -37,7 +37,7 @@ current_phase_1 = 0
 current_phase_2 = 0
 
 # Reinforcement Learning Hyperparameters
-TOTAL_STEPS = 5000  # The total number of simulation steps for continuous (online) training.
+TOTAL_STEPS = 6000  # The total number of simulation steps for continuous (online) training.
 ALPHA = 0.1  # Learning rate (α) between[0, 1]
 GAMMA = 0.9  # Discount factor (γ) between[0, 1]
 EPSILON = 0.1  # Exploration rate (ε) between[0, 1]

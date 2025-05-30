@@ -1,0 +1,10 @@
+<additional>
+    <tlLogic id="H2" type="static" programID="custom" offset="0">
+        <phase duration="10000" state="rGG"/>
+		<phase duration="10000" state="GGG"/>
+    </tlLogic>
+    <tlLogic id="H3" type="static" programID="custom" offset="0">
+        <phase duration="10000" state="rGG"/>
+		<phase duration="10000" state="GGG"/>
+    </tlLogic>
+</additional>

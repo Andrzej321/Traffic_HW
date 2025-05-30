@@ -13,7 +13,7 @@ else:
     sys.exit("Please declare environment variable 'SUMO_HOME'")
 
 # Define paths
-CONFIG_FILE = "../sumo_files/onramp_test.sumocfg"  # Unseen scenario config
+CONFIG_FILE = "../sumo_files/test_files/onramp_test.sumocfg"  # Unseen scenario config
 MODEL_DIR = "../zsom/models_3_Zs"  # Directory with trained models
 RUN_NUMBER = 1  # Choose which run's models to load (1 to NUM_RUNS)
 

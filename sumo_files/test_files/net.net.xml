@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-05-06 22:25:41 by Eclipse SUMO netconvert Version 1.22.0
+<netconvertConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="onramp.net.xml"/>
+        <node-files value="onramp.nod.xml"/>
+        <edge-files value="onramp.edg.xml"/>
+        <type-files value="onramp.typ.xml"/>
+    </input>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+    </junctions>
+
+</netconvertConfiguration>
+-->
+
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,-50.00,1000.00,0.00" origBoundary="0.00,-50.00,1000.00,0.00" projParameter="!"/>
+
+    <type id="highway" numLanes="2" speed="33.33"/>
+
+    <edge id=":H2_0" function="internal">
+        <lane id=":H2_0_0" index="0" speed="13.89" length="15.06" shape="384.34,-9.62 387.37,-7.92 390.24,-6.37 393.67,-5.24 398.36,-4.80"/>
+    </edge>
+    <edge id=":H2_1" function="internal">
+        <lane id=":H2_1_0" index="0" speed="13.89" length="15.16" shape="383.20,-4.80 398.36,-4.80"/>
+        <lane id=":H2_1_1" index="1" speed="13.89" length="15.16" shape="383.20,-1.60 398.36,-1.60"/>
+    </edge>
+    <edge id=":H3_0" function="internal">
+        <lane id=":H3_0_0" index="0" speed="13.89" length="15.06" shape="784.34,-9.62 787.37,-7.92 790.24,-6.37 793.67,-5.24 798.36,-4.80"/>
+    </edge>
+    <edge id=":H3_1" function="internal">
+        <lane id=":H3_1_0" index="0" speed="13.89" length="15.16" shape="783.20,-4.80 798.36,-4.80"/>
+        <lane id=":H3_1_1" index="1" speed="13.89" length="15.16" shape="783.20,-1.60 798.36,-1.60"/>
+    </edge>
+
+    <edge id="h1" from="H1" to="H2" priority="-1" type="highway">
+        <lane id="h1_0" index="0" speed="33" length="383.20" shape="0.00,-4.80 383.20,-4.80"/>
+        <lane id="h1_1" index="1" speed="33" length="383.20" shape="0.00,-1.60 383.20,-1.60"/>
+    </edge>
+    <edge id="h2" from="H2" to="H3" priority="-1" type="highway">
+        <lane id="h2_0" index="0" speed="33" length="384.84" shape="398.36,-4.80 783.20,-4.80"/>
+        <lane id="h2_1" index="1" speed="33" length="384.84" shape="398.36,-1.60 783.20,-1.60"/>
+    </edge>
+    <edge id="h3" from="H3" to="H4" priority="-1" type="highway">
+        <lane id="h3_0" index="0" speed="33" length="201.64" shape="798.36,-4.80 1000.00,-4.80"/>
+        <lane id="h3_1" index="1" speed="33" length="201.64" shape="798.36,-1.60 1000.00,-1.60"/>
+    </edge>
+    <edge id="r1" from="R1" to="H2" priority="-1">
+        <lane id="r1_0" index="0" speed="10" length="93.49" shape="300.72,-51.43 384.34,-9.62"/>
+    </edge>
+    <edge id="r2" from="R2" to="H3" priority="-1">
+        <lane id="r2_0" index="0" speed="10" length="93.49" shape="700.72,-51.43 784.34,-9.62"/>
+    </edge>
+
+    <tlLogic id="H2" type="static" programID="custom" offset="0">
+        <phase duration="10000" state="rGG"/>
+		<phase duration="10000" state="GGG"/>
+    </tlLogic>
+    <tlLogic id="H3" type="static" programID="custom" offset="0">
+        <phase duration="10000" state="rGG"/>
+		<phase duration="10000" state="GGG"/>
+    </tlLogic>
+
+    <junction id="H1" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-6.40"/>
+    <junction id="H2" type="traffic_light" x="400.00" y="0.00" incLanes="r1_0 h1_0 h1_1" intLanes=":H2_0_0 :H2_1_0 :H2_1_1" shape="398.36,0.00 398.36,-6.40 395.36,-6.53 393.18,-6.91 391.43,-7.54 389.74,-8.44 387.74,-9.61 385.05,-11.05 383.62,-8.19 383.20,-6.40 383.20,0.00">
+        <request index="0" response="110" foes="110" cont="0"/>
+        <request index="1" response="000" foes="001" cont="0"/>
+        <request index="2" response="000" foes="001" cont="0"/>
+    </junction>
+    <junction id="H3" type="traffic_light" x="800.00" y="0.00" incLanes="r2_0 h2_0 h2_1" intLanes=":H3_0_0 :H3_1_0 :H3_1_1" shape="798.36,0.00 798.36,-6.40 795.36,-6.53 793.18,-6.91 791.43,-7.54 789.74,-8.44 787.74,-9.61 785.05,-11.05 783.62,-8.19 783.20,-6.40 783.20,0.00">
+        <request index="0" response="110" foes="110" cont="0"/>
+        <request index="1" response="000" foes="001" cont="0"/>
+        <request index="2" response="000" foes="001" cont="0"/>
+    </junction>
+    <junction id="H4" type="dead_end" x="1000.00" y="0.00" incLanes="h3_0 h3_1" intLanes="" shape="1000.00,-6.40 1000.00,0.00"/>
+    <junction id="R1" type="dead_end" x="300.00" y="-50.00" incLanes="" intLanes="" shape="300.00,-50.00 301.43,-52.86"/>
+    <junction id="R2" type="dead_end" x="700.00" y="-50.00" incLanes="" intLanes="" shape="700.00,-50.00 701.43,-52.86"/>
+
+    <connection from="h1" to="h2" fromLane="0" toLane="0" via=":H2_1_0" tl="H2" linkIndex="1" dir="s" state="O"/>
+    <connection from="h1" to="h2" fromLane="1" toLane="1" via=":H2_1_1" tl="H2" linkIndex="2" dir="s" state="O"/>
+    <connection from="h2" to="h3" fromLane="0" toLane="0" via=":H3_1_0" tl="H3" linkIndex="1" dir="s" state="O"/>
+    <connection from="h2" to="h3" fromLane="1" toLane="1" via=":H3_1_1" tl="H3" linkIndex="2" dir="s" state="O"/>
+    <connection from="r1" to="h2" fromLane="0" toLane="0" via=":H2_0_0" tl="H2" linkIndex="0" dir="s" state="o"/>
+    <connection from="r2" to="h3" fromLane="0" toLane="0" via=":H3_0_0" tl="H3" linkIndex="0" dir="s" state="o"/>
+
+    <connection from=":H2_0" to="h2" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":H2_1" to="h2" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":H2_1" to="h2" fromLane="1" toLane="1" dir="s" state="M"/>
+    <connection from=":H3_0" to="h3" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":H3_1" to="h3" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":H3_1" to="h3" fromLane="1" toLane="1" dir="s" state="M"/>
+
+</net>

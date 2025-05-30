@@ -346,11 +346,11 @@ for run in range(NUM_RUNS):
 
 
     # Export trained model
-    os.makedirs("models_3_Zs", exist_ok=True)
-    model_path_1 = f"../zsom/models_3_Zs/run_{run + 1}_1"
-    model_path_2 = f"../zsom/models_3_Zs/run_{run + 1}_2"
-    dqn_model_1.export(model_path_1)
-    dqn_model_2.export(model_path_2)
+    os.makedirs("models_4", exist_ok=True)
+    model_path_1 = f"../zsom/models_4/run_{run + 1}_1.keras"
+    model_path_2 = f"../zsom/models_4/run_{run + 1}_2.keras"
+    dqn_model_1.save(model_path_1)
+    dqn_model_2.save(model_path_2)
     print(f"Run {run + 1}: Trained model saved to '{model_path_1}' and '{model_path_2}'")
 
     # Close SUMO connection for this run

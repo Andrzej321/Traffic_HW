@@ -1,8 +1,8 @@
 <additional>
-    <inductionLoop id="loop0" lane="h1_0" pos="350" freq="1" file="out_h1_1.xml"/>
-    <inductionLoop id="loop1" lane="h1_1" pos="350" freq="1" file="out_h1_2.xml"/>
-	<inductionLoop id="loop2" lane="r1_0" pos="90" freq="1" file="out_r1_1.xml"/>
-    <inductionLoop id="loop3" lane="h2_0" pos="750" freq="1" file="out_h2_1.xml"/>
-    <inductionLoop id="loop4" lane="h2_1" pos="750" freq="1" file="out_h2_2.xml"/>
-	<inductionLoop id="loop5" lane="r2_0" pos="90" freq="1" file="out_r2_1.xml"/>
+    <laneAreaDetector id="loop0" lane="h1_0" pos="330" length="50" freq="1" file="NUL"/>
+    <laneAreaDetector id="loop1" lane="h1_1" pos="330" length="50" freq="1" file="NUL"/>
+    <laneAreaDetector id="loop2" lane="r1_0" pos="70" length="20" freq="1" file="NUL"/>
+    <laneAreaDetector id="loop3" lane="h2_0" pos="330" length="50" freq="1" file="NUL"/>
+    <laneAreaDetector id="loop4" lane="h2_1" pos="330" length="50" freq="1" file="NUL"/>
+    <laneAreaDetector id="loop5" lane="r2_0" pos="70" length="20" freq="1" file="NUL"/>
 </additional>

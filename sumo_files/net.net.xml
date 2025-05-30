@@ -27,7 +27,7 @@
 
     <location netOffset="0.00,0.00" convBoundary="0.00,-50.00,1000.00,0.00" origBoundary="0.00,-50.00,1000.00,0.00" projParameter="!"/>
 
-    <type id="highway" numLanes="2"/>
+    <type id="highway" numLanes="2" speed="33.33"/>
 
     <edge id=":H2_0" function="internal">
         <lane id=":H2_0_0" index="0" speed="13.89" length="15.06" shape="384.34,-9.62 387.37,-7.92 390.24,-6.37 393.67,-5.24 398.36,-4.80"/>
@@ -45,35 +45,31 @@
     </edge>
 
     <edge id="h1" from="H1" to="H2" priority="-1" type="highway">
-        <lane id="h1_0" index="0" speed="13.89" length="383.20" shape="0.00,-4.80 383.20,-4.80"/>
-        <lane id="h1_1" index="1" speed="13.89" length="383.20" shape="0.00,-1.60 383.20,-1.60"/>
+        <lane id="h1_0" index="0" speed="33" length="383.20" shape="0.00,-4.80 383.20,-4.80"/>
+        <lane id="h1_1" index="1" speed="33" length="383.20" shape="0.00,-1.60 383.20,-1.60"/>
     </edge>
     <edge id="h2" from="H2" to="H3" priority="-1" type="highway">
-        <lane id="h2_0" index="0" speed="13.89" length="384.84" shape="398.36,-4.80 783.20,-4.80"/>
-        <lane id="h2_1" index="1" speed="13.89" length="384.84" shape="398.36,-1.60 783.20,-1.60"/>
+        <lane id="h2_0" index="0" speed="33" length="384.84" shape="398.36,-4.80 783.20,-4.80"/>
+        <lane id="h2_1" index="1" speed="33" length="384.84" shape="398.36,-1.60 783.20,-1.60"/>
     </edge>
     <edge id="h3" from="H3" to="H4" priority="-1" type="highway">
-        <lane id="h3_0" index="0" speed="13.89" length="201.64" shape="798.36,-4.80 1000.00,-4.80"/>
-        <lane id="h3_1" index="1" speed="13.89" length="201.64" shape="798.36,-1.60 1000.00,-1.60"/>
+        <lane id="h3_0" index="0" speed="33" length="201.64" shape="798.36,-4.80 1000.00,-4.80"/>
+        <lane id="h3_1" index="1" speed="33" length="201.64" shape="798.36,-1.60 1000.00,-1.60"/>
     </edge>
     <edge id="r1" from="R1" to="H2" priority="-1">
-        <lane id="r1_0" index="0" speed="13.89" length="93.49" shape="300.72,-51.43 384.34,-9.62"/>
+        <lane id="r1_0" index="0" speed="10" length="93.49" shape="300.72,-51.43 384.34,-9.62"/>
     </edge>
     <edge id="r2" from="R2" to="H3" priority="-1">
-        <lane id="r2_0" index="0" speed="13.89" length="93.49" shape="700.72,-51.43 784.34,-9.62"/>
+        <lane id="r2_0" index="0" speed="10" length="93.49" shape="700.72,-51.43 784.34,-9.62"/>
     </edge>
 
-    <tlLogic id="H2" type="static" programID="0" offset="0">
-        <phase duration="42" state="Grr"/>
-        <phase duration="3"  state="yrr"/>
-        <phase duration="42" state="rGG"/>
-        <phase duration="3"  state="ryy"/>
+    <tlLogic id="H2" type="static" programID="custom" offset="0">
+        <phase duration="10" state="rGG"/>
+		<phase duration="10" state="GGG"/>
     </tlLogic>
-    <tlLogic id="H3" type="static" programID="0" offset="0">
-        <phase duration="42" state="Grr"/>
-        <phase duration="3"  state="yrr"/>
-        <phase duration="42" state="rGG"/>
-        <phase duration="3"  state="ryy"/>
+    <tlLogic id="H3" type="static" programID="custom" offset="0">
+        <phase duration="10" state="rGG"/>
+		<phase duration="10" state="GGG"/>
     </tlLogic>
 
     <junction id="H1" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-6.40"/>

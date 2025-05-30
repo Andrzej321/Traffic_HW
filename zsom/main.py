@@ -13,7 +13,7 @@ if 'SUMO_HOME' not in os.environ:
 # Add SUMO tools to Python path
 tools_path = os.path.join(os.environ['SUMO_HOME'], 'tools')
 sys.path.append(tools_path)
-cfg_file = "../sumo_files/onramp.sumocfg"
+cfg_file = "../sumo_files/onramp1.sumocfg"
 #network = "../sumo_files/onramp.netccfg"
 #network_cmd = ["sumo-gui", "-c", network]
 

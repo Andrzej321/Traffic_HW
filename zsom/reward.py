@@ -1,158 +1,351 @@
-import gymnasium as gym
-import traci
+# Step 1: Add modules to provide access to specific libraries and functions
+import os  # Module provides functions to handle file paths, directories, environment variables
+import sys  # Module provides access to Python-specific system parameters and functions
+import random
 import numpy as np
-from pettingzoo import ParallelEnv
-from stable_baselines3 import PPO
-from stable_baselines3.common.env_checker import check_env
-from gymnasium.spaces import Discrete, Box
-import gym as gym_old  # For compatibility with Stable-Baselines3 wrapper
+import matplotlib.pyplot as plt  # Visualization
+
+# Step 1.1: (Additional) Imports for Deep Q-Learning
+import tensorflow
+from tensorflow import keras
+from tensorflow.keras import layers
+
+# Step 2: Establish path to SUMO (SUMO_HOME)
+if 'SUMO_HOME' in os.environ:
+    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
+    sys.path.append(tools)
+else:
+    sys.exit("Please declare environment variable 'SUMO_HOME'")
+
+# Step 3: Add Traci module to provide access to specific libraries and functions
+import traci  # Static network information (such as reading and analyzing network files)
+
+CONFIG_DIR = "../sumo_files"
+
+# Get list of .sumocfg files and randomly select one
+def get_random_config():
+    try:
+        # List all files in the config directory
+        files = os.listdir(CONFIG_DIR)
+        # Filter for .sumocfg files
+        config_files = [f for f in files if f.endswith('.sumocfg')]
+        if not config_files:
+            sys.exit(f"No .sumocfg files found in {CONFIG_DIR}")
+        # Randomly choose one config file
+        chosen_config = random.choice(config_files)
+        # Return the full path to the chosen file
+        config_path = os.path.join(CONFIG_DIR, chosen_config)
+        print(f"Selected SUMO config file: {config_path}")
+        return config_path
+    except Exception as e:
+        sys.exit(f"Error accessing config files: {e}")
+
+# Define SUMO configuration with random choice
+
+# traci.gui.setSchema("View #0", "real world")
+
+# -------------------------
+# Step 6: Define Variables
+# -------------------------
+
+# Variables for RL State (queue lengths from detectors and current phase)
+loop0 = 0
+loop1 = 0
+loop2 = 0
+loop3 = 0
+loop4 = 0
+loop5 = 0
+current_phase_1 = 0
+current_phase_2 = 0
+
+# ---- Reinforcement Learning Hyperparameters ----
+TOTAL_STEPS = 6000  # The total number of simulation steps for continuous (online) training.
+
+ALPHA = 0.1  # Learning rate (α) between[0, 1]    #If α = 1, you fully replace the old Q-value with the newly computed estimate.
+# If α = 0, you ignore the new estimate and never update the Q-value.
+GAMMA = 0.9  # Discount factor (γ) between[0, 1]  #If γ = 0, the agent only cares about the reward at the current step (no future rewards).
+# If γ = 1, the agent cares equally about current and future rewards, looking at long-term gains.
+EPSILON = 0.1  # Exploration rate (ε) between[0, 1] #If ε = 0 means very greedy, if=1 means very random
+
+ACTIONS = [0, 1, 2, 3]  # The discrete action space (0 all red, 1 1st ramp green, 2nd ramp green, 3rd both green)
+
+# ---- Additional Stability Parameters ----
+MIN_GREEN_STEPS = 10
+
+# Number of training runs
+NUM_RUNS = 10
+
+# Lists to store results for all runs
+all_step_histories = []
+all_reward_histories = []
+all_queue_histories = []
 
 
-class SumoEnv(ParallelEnv):
-    metadata = {"render_modes": ["human"], "name": "sumo_env_v0"}
+# -------------------------
+# Step 7: Define Functions
+# -------------------------
 
-    def __init__(self):
-        self.agents = ["tls_H2", "tls_H3"]
-        self.possible_agents = self.agents[:]
-        self.action_spaces = {agent: Discrete(2) for agent in self.agents}  # 0: GGG, 1: rGG
-        self.observation_spaces = {agent: Box(low=0, high=np.inf, shape=(4,)) for agent in
-                                   self.agents}  # [speed, density, queue, waiting_time]
-        self.sumo_cmd = ["sumo", "-c", "../sumo_files/onramp.sumo.cfg"]  # Update path if needed
-        self.min_phase_duration = 5
-        self.last_phase_change = {"H2": 0, "H3": 0}
-        self.current_phase = {"H2": "GGG", "H3": "GGG"}
-
-    def reset(self, seed=None, options=None):
-        traci.close()
-        traci.start(self.sumo_cmd)
-        self.last_phase_change = {"H2": 0, "H3": 0}
-        self.current_phase = {"H2": "GGG", "H3": "GGG"}
-        self.agents = self.possible_agents[:]
-        obs = {f"tls_H2": self._get_obs("H2"), f"tls_H3": self._get_obs("H3")}
-        infos = {agent: {} for agent in self.agents}
-        return obs, infos
-
-    def step(self, actions):
-        current_time = traci.simulation.getTime()
-        for agent, action in actions.items():
-            tls_id = agent[4:]  # Extract H2 or H3
-            if current_time - self.last_phase_change[tls_id] >= self.min_phase_duration:
-                state = "GGG" if action == 0 else "rGG"
-                if state != self.current_phase[tls_id]:
-                    traci.trafficlight.setRedYellowGreenState(tls_id, state)
-                    self.last_phase_change[tls_id] = current_time
-                    self.current_phase[tls_id] = state
-
-        traci.simulationStep()
-
-        obs = {f"tls_H2": self._get_obs("H2"), f"tls_H3": self._get_obs("H3")}
-        reward = self._compute_reward()
-        rewards = {agent: reward for agent in self.agents}  # Shared reward
-        terminated = {agent: traci.simulation.getTime() >= 1000 for agent in self.agents}
-        truncated = {agent: False for agent in self.agents}
-        infos = {agent: {} for agent in self.agents}
-        if terminated["tls_H2"]:
-            self.agents = []
-        return obs, rewards, terminated, truncated, infos
-
-    def _get_obs(self, tls):
-        if tls == "H2":
-            lanes = ["h1_0", "h1_1", "r1_0"]
-        else:
-            lanes = ["h2_0", "h2_1", "r2_0"]
-        active_lanes = [lane for lane in lanes[:2] if traci.lane.getLastStepVehicleNumber(lane) > 0]
-        speed = sum(traci.lane.getLastStepMeanSpeed(lane) for lane in active_lanes) / (len(active_lanes) or 1)
-        density = sum(traci.lane.getLastStepVehicleNumber(lane) for lane in lanes[:2]) / 2
-        queue = traci.lane.getLastStepHaltingNumber(lanes[2])
-        waiting_time = traci.lane.getWaitingTime(lanes[2])
-        return np.array([speed, density, queue, waiting_time], dtype=np.float32)
-
-    def _compute_reward(self):
-        all_lanes = ["h1_0", "h1_1", "h2_0", "h2_1", "r1_0", "r2_0"]
-        speeds = [traci.lane.getLastStepMeanSpeed(lane) for lane in all_lanes if
-                  traci.lane.getLastStepVehicleNumber(lane) > 0]
-        avg_speed = sum(speeds) / len(speeds) if speeds else 0.0
-        queue_r1 = traci.lane.getLastStepHaltingNumber("r1_0")
-        queue_r2 = traci.lane.getLastStepHaltingNumber("r2_0")
-        speed_reward = avg_speed / 33.33 if avg_speed > 0 else 0.0
-        queue_penalty = -0.1 * (queue_r1 + queue_r2)
-        return speed_reward + queue_penalty
-
-    def close(self):
-        # Ensure the SUMO connection is properly closed
-        traci.close()
-
-
-# Wrapper to make PettingZoo env compatible with Stable-Baselines3
-class SB3Wrapper(gym.Env):
-    def __init__(self, env):
-        super().__init__()
-        self.env = env
-        # Combine action spaces into a single Discrete space for both agents (0: GGG/GGG, 1: GGG/rGG, 2: rGG/GGG, 3: rGG/rGG)
-        self.action_space = Discrete(4)
-        self.observation_space = Box(
-            low=0, high=np.inf, shape=(8,), dtype=np.float32  # Concatenate observations for both agents
-        )
-
-    def reset(self, seed=None, options=None):
-        obs, infos = self.env.reset(seed=seed, options=options)
-        combined_obs = np.concatenate([obs["tls_H2"], obs["tls_H3"]])
-        return combined_obs, infos["tls_H2"]
-
-    def close(self):
-        # Ensure the inner environment closes properly
-        self.env.close()
-
-
-    def step(self, action):
-        # Map single action to multi-agent actions
-        action_map = {
-            0: {"tls_H2": 0, "tls_H3": 0},  # GGG/GGG
-            1: {"tls_H2": 0, "tls_H3": 1},  # GGG/rGG
-            2: {"tls_H2": 1, "tls_H3": 0},  # rGG/GGG
-            3: {"tls_H2": 1, "tls_H3": 1}  # rGG/rGG
-        }
-        actions = action_map[action]
-        obs, rewards, terminated, truncated, infos = self.env.step(actions)
-        combined_obs = np.concatenate([obs["tls_H2"], obs["tls_H3"]])
-        reward = rewards["tls_H2"]  # Shared reward
-        done = terminated["tls_H2"]
-        return combined_obs, reward, done, truncated["tls_H2"], infos["tls_H2"]
-
-
-# Training
-def train():
-    env = SumoEnv()
-    wrapped_env = SB3Wrapper(env)
-    check_env(wrapped_env, warn=True)  # Validate environment
-    model = PPO("MlpPolicy", wrapped_env, verbose=1, learning_rate=0.0001)
-    print("Starting training...")
-    model.learn(total_timesteps=10000)  # Adjust based on convergence
-    model.save("sumo_ppo_model")
-    print("Training complete. Model saved at sumo_ppo_model.zip")
-    wrapped_env.close()
+def build_model(state_size, action_size):
+    """
+    Build a simple feedforward neural network that approximates Q-values.
+    """
+    model = keras.Sequential()  # Feedforward neural network
+    model.add(layers.Input(shape=(state_size,)))  # Input layer
+    model.add(layers.Dense(32, activation='relu'))  # First hidden layer
+    model.add(layers.Dense(32, activation='relu'))  # Second hidden layer
+    model.add(layers.Dense(action_size, activation='linear'))  # Output layer
+    model.compile(
+        loss='mse',
+        optimizer=keras.optimizers.Adam(learning_rate=0.001)
+    )
     return model
 
 
-# Deployment
-def deploy(model_path):
-    env = SumoEnv()
-    env.sumo_cmd = ["sumo-gui", "-c", "../sumo_files/onramp.sumo.cfg"]
-    wrapped_env = SB3Wrapper(env)
-    model = PPO.load(model_path)
-    obs, _ = wrapped_env.reset()
-    terminated = False
+def to_array(state_tuple):
+    """
+    Convert the state tuple into a NumPy array for neural network input.
+    """
+    return np.array(state_tuple, dtype=np.float32).reshape((1, -1))
 
-    while not terminated:
-        action, _ = model.predict(obs)
-        obs, reward, terminated, _, _ = wrapped_env.step(action)
-        print(f"Time: {traci.simulation.getTime():.1f}, Reward: {reward:.2f}")
-
-    wrapped_env.close()
+    # Create the DQN model
 
 
-if __name__ == "__main__":
-    print("Starting training...")
-    model = train()
-    print("Deploying trained model in SUMO-GUI...")
-    deploy("sumo_ppo_model")
+
+def get_max_Q_value_of_state(s):  # 1. Objective Function
+    state_array = to_array(s)
+    Q_values = dqn_model.predict(state_array, verbose=0)[0]  # shape: (action_size,)
+    return np.max(Q_values)
+
+
+def get_reward(state):  # 2. Constraint 2
+    """
+    Simple reward function:
+    Negative of total queue length to encourage shorter queues.
+    """
+    all_lanes = ["h1_0", "h1_1", "h2_0", "h2_1", "r1_0", "r2_0"]
+    speeds = [traci.lane.getLastStepMeanSpeed(lane) for lane in all_lanes if
+              traci.lane.getLastStepVehicleNumber(lane) > 0]
+    avg_speed = sum(speeds) / len(speeds) if speeds else 0.0
+
+    queue_r1 = traci.lane.getLastStepHaltingNumber("r1_0")
+    queue_r2 = traci.lane.getLastStepHaltingNumber("r2_0")
+
+    emergency_brakes = 0
+    for veh_id in traci.vehicle.getIDList():
+        # Get current deceleration (positive value, m/s^2)
+        decel = traci.vehicle.getDecel(veh_id)
+        # Get emergency deceleration threshold (m/s^2)
+        emergency_decel = traci.vehicle.getEmergencyDecel(veh_id)
+        # Count as emergency braking if deceleration exceeds or equals emergency threshold
+        if decel >= emergency_decel:
+            emergency_brakes += 1
+
+    speed_reward = avg_speed / 33.33 if avg_speed > 0 else 0.0
+    queue_penalty = -0.1 * (queue_r1 + queue_r2)
+    brake_penalty = -0.9 * emergency_brakes
+
+    return speed_reward + queue_penalty + brake_penalty
+
+
+def get_state():  # 3&4. Constraint 3 & 4
+    global loop0, loop1, loop2, loop3, loop4, loop5, current_phase_1, current_phase_2
+
+    # Traffic light ID
+    det0 = "loop0"
+    det1 = "loop1"
+    det2 = "loop2"
+    det3 = "loop3"
+    det4 = "loop4"
+    det5 = "loop5"
+
+
+
+    # Get queue lengths from each detector
+    loop0 = traci.lanearea.getLastStepVehicleNumber(det0)
+    loop1 = traci.lanearea.getLastStepVehicleNumber(det1)
+    loop2 = traci.lanearea.getLastStepVehicleNumber(det2)
+    loop3 = traci.lanearea.getLastStepVehicleNumber(det3)
+    loop4 = traci.lanearea.getLastStepVehicleNumber(det4)
+    loop5 = traci.lanearea.getLastStepVehicleNumber(det5)
+
+    traffic_light_id_1 = "H2"
+    traffic_light_id_2 = "H3"
+
+    # Get current phase index
+    current_phase_1 = traci.trafficlight.getPhase(traffic_light_id_1)
+    current_phase_2 = traci.trafficlight.getPhase(traffic_light_id_2)
+
+    return (loop0, loop1, loop2, loop3, loop4, loop5, current_phase_1, current_phase_2)
+
+
+def apply_action(action, tls_id_1="H2", tls_id_2="H3"):  # 5. Constraint 5
+    """
+    Executes the chosen action on the traffic light, combining:
+      - Min Green Time check
+      - Switching to the next phase if allowed
+    Constraint #5: Ensure at least MIN_GREEN_STEPS pass before switching again.
+    """
+    global last_switch_step
+
+    if action == 0:
+        traci.trafficlight.setRedYellowGreenState(tls_id_1,"rGG")
+        traci.trafficlight.setRedYellowGreenState(tls_id_2,"rGG")
+        return
+    elif action == 1:
+        if current_simulation_step - last_switch_step >= MIN_GREEN_STEPS:
+            traci.trafficlight.setRedYellowGreenState(tls_id_1,"GGG")
+            traci.trafficlight.setRedYellowGreenState(tls_id_2,"rGG")
+            last_switch_step = current_simulation_step
+        return
+    elif action == 2:
+        if current_simulation_step - last_switch_step >= MIN_GREEN_STEPS:
+            traci.trafficlight.setRedYellowGreenState(tls_id_1, "rGG")
+            traci.trafficlight.setRedYellowGreenState(tls_id_2, "GGG")
+            last_switch_step = current_simulation_step
+        return
+    elif action == 3:
+        if current_simulation_step - last_switch_step >= MIN_GREEN_STEPS:
+            traci.trafficlight.setRedYellowGreenState(tls_id_1, "GGG")
+            traci.trafficlight.setRedYellowGreenState(tls_id_2, "GGG")
+            last_switch_step = current_simulation_step
+        return
+
+
+def update_Q_table(old_state, action, reward, new_state):  # 6. Constraint 6
+    """
+    In DQN, we do a single-step gradient update instead of a table update.
+    """
+    # 1) Predict current Q-values from old_state (current state)
+    old_state_array = to_array(old_state)
+    Q_values_old = dqn_model.predict(old_state_array, verbose=0)[0]
+    # 2) Predict Q-values for new_state to get max future Q (new state)
+    new_state_array = to_array(new_state)
+    Q_values_new = dqn_model.predict(new_state_array, verbose=0)[0]
+    best_future_q = np.max(Q_values_new)
+
+    # 3) Incorporate ALPHA to partially update the Q-value
+    Q_values_old[action] = Q_values_old[action] + ALPHA * (reward + GAMMA * best_future_q - Q_values_old[action])
+
+    # 4) Train (fit) the DQN on this single sample
+    dqn_model.fit(old_state_array, np.array([Q_values_old]), verbose=0)
+
+
+def get_action_from_policy(state):  # 7. Constraint 7
+    """
+    Epsilon-greedy strategy using the DQN's predicted Q-values.
+    """
+    if random.random() < EPSILON:
+        return random.choice(ACTIONS)
+    else:
+        state_array = to_array(state)
+        Q_values = dqn_model.predict(state_array, verbose=0)[0]
+        return int(np.argmax(Q_values))
+
+
+# -------------------------
+# Step 8: Fully Online Continuous Learning Loop
+# -------------------------
+
+# Lists to record data for plotting
+
+state_size = 8  # (q_EB_0, q_EB_1, q_EB_2, q_SB_0, q_SB_1, q_SB_2, current_phase)
+action_size = len(ACTIONS)
+dqn_model = build_model(state_size, action_size)
+
+print("\n=== Starting Fully Online Continuous Learning (DQN) ===")
+for run in range(NUM_RUNS):
+
+    last_switch_step = -MIN_GREEN_STEPS
+    cumulative_reward = 0.0
+    step_history = []
+    reward_history = []
+    queue_history = []
+
+    chosen_config_file = get_random_config()
+
+    # Step 4: Define Sumo configuration
+    Sumo_config = [
+        'sumo',
+        '-c', chosen_config_file,
+        '--step-length', '0.2',
+        '--delay', '10',
+        '--lateral-resolution', '0'
+    ]
+
+    # Step 5: Open connection between SUMO and Traci
+    traci.start(Sumo_config)
+    print(f"\nRun {run + 1}/{NUM_RUNS}: Training Started")
+
+    for step in range(TOTAL_STEPS):
+        current_simulation_step = step  # keep this variable for apply_action usage
+
+        state = get_state()
+        action = get_action_from_policy(state)
+        apply_action(action)
+
+        traci.simulationStep()  # Advance simulation by one step
+
+        new_state = get_state()
+        reward = get_reward(new_state)
+        cumulative_reward += reward
+
+        update_Q_table(state, action, reward, new_state)
+
+        # Print Q-values for the old_state right after update
+        updated_q_vals = dqn_model.predict(to_array(state), verbose=0)[0]
+
+        # Record data every 100 steps
+        if step % 1 == 0:
+            updated_q_vals = dqn_model.predict(to_array(state), verbose=0)[0]
+            print(
+                f"Step {step}, Current_State: {state}, Action: {action}, New_State: {new_state}, Reward: {reward:.2f}, Cumulative Reward: {cumulative_reward:.2f}, Q-values(current_state): {updated_q_vals}")
+        step_history.append(step)
+        reward_history.append(cumulative_reward)
+        queue_history.append(sum(new_state[:-1]))  # sum of queue lengths
+
+    os.makedirs("models", exist_ok=True)
+    model_path = f"../zsom/models/run{run + 1}"
+    dqn_model.export(model_path)
+    print(f"Run {run + 1}: Trained model saved to '{model_path}'")
+
+    # Store results for this run
+    all_step_histories.append(step_history)
+    all_reward_histories.append(reward_history)
+    all_queue_histories.append(queue_history)
+
+    # Close SUMO connection for this run
+    traci.close()
+    print(f"Run {run + 1}: Training Completed")
+
+
+
+# ~~~ Print final model summary (replacing Q-table info) ~~~
+print("\nOnline Training completed.")
+print("DQN Model Summary:")
+dqn_model.summary()
+
+# -------------------------
+# Visualization of Results
+# -------------------------
+
+# Plot Cumulative Reward over Simulation Steps
+plt.figure(figsize=(10, 6))
+for run in range(NUM_RUNS):
+    plt.plot(all_step_histories[run], all_reward_histories[run], marker='o', linestyle='-', label=f"Run {run + 1}")
+plt.xlabel("Simulation Step")
+plt.ylabel("Cumulative Reward")
+plt.title("RL Training (DQN): Cumulative Reward over Steps for 10 Runs")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Plot Total Queue Length
+plt.figure(figsize=(10, 6))
+for run in range(NUM_RUNS):
+    plt.plot(all_step_histories[run], all_queue_histories[run], marker='o', linestyle='-', label=f"Run {run + 1}")
+plt.xlabel("Simulation Step")
+plt.ylabel("Total Queue Length")
+plt.title("RL Training (DQN): Queue Length over Steps for 10 Runs")
+plt.legend()
+plt.grid(True)
+plt.show()

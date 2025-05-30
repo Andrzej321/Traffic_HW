@@ -1,8 +1,8 @@
 from tensorflow.keras.models import load_model
 import numpy as np
 
-model_path_1 = r"..\zsom\models_2\run10\saved_model_1.pb"
-model_path_2 = r"..\zsom\models_2\run10\saved_model_2.pb"
+model_path_1 = r"..\zsom\models_2\final\run_1_5\saved_model.pb"
+model_path_2 = r"..\zsom\models_2\final\run_2_5\saved_model.pb"
 
 dqn_model_1 = load_model(model_path_1)
 dqn_model_2 = load_model(model_path_2)
@@ -59,7 +59,7 @@ def get_action(state, model):
 
 import traci
 
-chosen_config_file = r"..\zsom\sumo_files\test.sumocfg"
+chosen_config_file = r"..\zsom\sumo_files\onramp5.sumocfg"
 
 sumo_config = [
     'sumo-gui',

@@ -64,12 +64,12 @@
     </edge>
 
     <tlLogic id="H2" type="static" programID="custom" offset="0">
-        <phase duration="10" state="rGG"/>
-		<phase duration="10" state="GGG"/>
+        <phase duration="10000" state="rGG"/>
+		<phase duration="10000" state="GGG"/>
     </tlLogic>
     <tlLogic id="H3" type="static" programID="custom" offset="0">
-        <phase duration="10" state="rGG"/>
-		<phase duration="10" state="GGG"/>
+        <phase duration="10000" state="rGG"/>
+		<phase duration="10000" state="GGG"/>
     </tlLogic>
 
     <junction id="H1" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-6.40"/>

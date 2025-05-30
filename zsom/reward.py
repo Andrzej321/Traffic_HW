@@ -110,7 +110,6 @@ def to_array(state_tuple):
     # Create the DQN model
 
 
-
 def get_max_Q_value_of_state(s):  # 1. Objective Function
     state_array = to_array(s)
     Q_values = dqn_model.predict(state_array, verbose=0)[0]  # shape: (action_size,)
@@ -250,6 +249,7 @@ def get_action_from_policy(state):  # 7. Constraint 7
 
 state_size = 8  # (q_EB_0, q_EB_1, q_EB_2, q_SB_0, q_SB_1, q_SB_2, current_phase)
 action_size = len(ACTIONS)
+
 dqn_model = build_model(state_size, action_size)
 
 print("\n=== Starting Fully Online Continuous Learning (DQN) ===")

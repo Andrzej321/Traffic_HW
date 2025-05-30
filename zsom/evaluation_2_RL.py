@@ -23,10 +23,6 @@ else:
 # -------------------------
 # Step 3: Define Variables
 # -------------------------
-
-# Get directory of sumo config files
-CONFIG_DIR = "../sumo_files"
-
 # Variables for RL State (queue lengths from detectors and current phase)
 loop0 = 0
 loop1 = 0
@@ -38,7 +34,7 @@ current_phase_1 = 0
 current_phase_2 = 0
 
 # Reinforcement Learning Hyperparameters
-TOTAL_STEPS = 5000  # The total number of simulation steps for continuous (online) training.
+TOTAL_STEPS = 500  # The total number of simulation steps for continuous (online) training.
 ALPHA = 0.1  # Learning rate (α) between[0, 1]
 GAMMA = 0.9  # Discount factor (γ) between[0, 1]
 EPSILON = 0.1  # Exploration rate (ε) between[0, 1]
@@ -158,7 +154,7 @@ def get_state_1():
 
     current_phase_1 = traci.trafficlight.getPhase(traffic_light_id_1)
 
-    return (loop0, loop1, loop2, current_phase_1)
+    return (loop0, loop1, loop2, current_phase_1, 0, 0, 0, 0)
 
 # Get states for 2nd on-ramp traffic light
 def get_state_2():
@@ -176,7 +172,7 @@ def get_state_2():
 
     current_phase_2 = traci.trafficlight.getPhase(traffic_light_id_2)
 
-    return (loop3, loop4, loop5, current_phase_2)
+    return (loop3, loop4, loop5, current_phase_2, 0, 0, 0, 0)
 
 # Apply action for 1st on-ramp traffic light
 def apply_action_1(action, tls_id = "H2"):
@@ -293,11 +289,11 @@ cumulative_reward_1 = 0.0
 cumulative_reward_2 = 0.0
 
 # Choose a random config file (predefined set of config files with varying lane density) to train on
-chosen_config_file = r"C:\my files\thesis\Traffic_HW\sumo_files\onramp_test.sumocfg"
+chosen_config_file = r"..\sumo_files\onramp_test.sumocfg"
 
 # Define Sumo configuration with the chosen config file
 Sumo_config = [
-    'sumo',
+    'sumo-gui',
     '-c', chosen_config_file,
     '--step-length', '0.2',
     '--delay', '10',
